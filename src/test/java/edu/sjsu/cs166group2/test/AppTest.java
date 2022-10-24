@@ -1,4 +1,4 @@
-package org.example;
+package edu.sjsu.cs166group2.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
