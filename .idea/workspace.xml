@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c5cc71e2-4d13-4293-a924-e84d7c155551" name="Changes" comment="Setting up project struct">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/DatabaseConnector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/DatabaseConnector.java" afterDir="false" />
-    </list>
+    <list default="true" id="c5cc71e2-4d13-4293-a924-e84d7c155551" name="Changes" comment="Setting up project struct" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -103,7 +99,7 @@
       <option name="presentableId" value="Default" />
       <updated>1666292723300</updated>
       <workItem from="1666647348787" duration="3266000" />
-      <workItem from="1666650660399" duration="2771000" />
+      <workItem from="1666650660399" duration="3098000" />
     </task>
     <task id="LOCAL-00001" summary="Setting up project struct">
       <created>1666648672751</created>

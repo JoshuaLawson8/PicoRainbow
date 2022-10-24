@@ -10,7 +10,7 @@ import com.mysql.cj.jdbc.Driver;
  */
 public class DatabaseConnector {
     public static void main(String[] args) {
-        String sql = "select \"hash\" from sha256;";
+        String sql = "select * from sha256;";
         String secretUrl = "jdbc:mysql://doadmin:AVNS_dku4d9HQcjNBDAQYqHg@db-mysql-nyc1-68984-do-user-12649737-0.b.db.ondigitalocean.com:25060/rainbowtable?ssl-mode=REQUIRED";
         try (Connection conn = DriverManager.getConnection(secretUrl);
              Statement stmt = conn.createStatement()) {
@@ -19,7 +19,8 @@ public class DatabaseConnector {
                 while (rs.next()) {
                     String hash = rs.getString("hash");
                     String password = rs.getString("password");
-                    System.out.println(password + ":"+hash);
+                    System.out.println(password);
+                    System.out.println(hash);
                 }
             } catch (SQLException ex) {
                 // handle any errors
