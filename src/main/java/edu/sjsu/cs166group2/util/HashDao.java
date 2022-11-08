@@ -72,4 +72,32 @@ public class HashDao {
             return null;
         }
     }
+
+    public boolean deleteHashPair(String hash, String hashType) {
+        if(hash == null || hash.isEmpty()){
+            System.out.println("Hash is null or empty");
+            return false;
+        }
+        else if(hash.length() != 64){
+            System.out.println("Provided Hash is not of length 64. Invalid input.");
+            return false;
+        }
+        else if(hashType == null || hashType.isEmpty()){
+            System.out.println("Hash type is not provided or invalid. Please choose between sha256....");
+            return false;
+        }
+        try{
+            String deleteSQL = "DELETE FROM "+hashType+" WHERE hash = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL);
+
+            preparedStatement.setString(1, hash);
+
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException e) {
+            System.out.println("Delete failed because: "+e.getMessage());
+            return false;
+        }
+        return true;
+    }
 }

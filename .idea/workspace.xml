@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c5cc71e2-4d13-4293-a924-e84d7c155551" name="Changes" comment="Add insert/read functions, JUnit tests, model, modified DatabaseConnector">
-      <change afterPath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/model/PassHash.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/HashDao.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/edu/sjsu/cs166group2/test/DatabaseTest.java" afterDir="false" />
+    <list default="true" id="c5cc71e2-4d13-4293-a924-e84d7c155551" name="Changes" comment="Added a DELETE method and modify tests to follow constraints">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/DatabaseConnector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/DatabaseConnector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/HashDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/sjsu/cs166group2/util/HashDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/edu/sjsu/cs166group2/test/DatabaseTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/edu/sjsu/cs166group2/test/DatabaseTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +45,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;
   }
 }</component>
-  <component name="RunManager" selected="JUnit.DatabaseTest.getAllData">
+  <component name="RunManager" selected="JUnit.DatabaseTest.findPassWithHashTest">
     <configuration name="DatabaseTest.findPassWithHashTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="PicoRainbow" />
       <extension name="coverage">
@@ -99,9 +96,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.DatabaseTest.getAllData" />
         <item itemvalue="JUnit.DatabaseTest.findPassWithHashTest" />
         <item itemvalue="JUnit.DatabaseTest.insertHashPairTest" />
+        <item itemvalue="JUnit.DatabaseTest.getAllData" />
       </list>
     </recent_temporary>
   </component>
@@ -120,8 +117,16 @@
       <workItem from="1667256172913" duration="2710000" />
       <workItem from="1667259065806" duration="11705000" />
       <workItem from="1667516928588" duration="6911000" />
-      <workItem from="1667862016236" duration="2426000" />
+      <workItem from="1667862016236" duration="5285000" />
     </task>
+    <task id="LOCAL-00001" summary="Add insert/read functions, JUnit tests, model, modified DatabaseConnector">
+      <created>1667864817946</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1667864817946</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,6 +145,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add insert/read functions, JUnit tests, model, modified DatabaseConnector" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add insert/read functions, JUnit tests, model, modified DatabaseConnector" />
+    <MESSAGE value="Added a DELETE method and modify tests to follow constraints" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a DELETE method and modify tests to follow constraints" />
   </component>
 </project>

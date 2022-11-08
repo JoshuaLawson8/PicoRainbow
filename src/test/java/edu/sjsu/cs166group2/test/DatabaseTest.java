@@ -13,6 +13,9 @@ public class DatabaseTest {
 
     static Connection connection;
     static HashDao hashDao;
+    String testHash = "0000000000000000000000000000000000000000000000000000000000000000";
+    String testPass = "testPass";
+    String hashType = "sha256";
 
     @BeforeAll
     public static void setup(){
@@ -28,7 +31,7 @@ public class DatabaseTest {
 
     @Test
     public void getAllData() {
-        String sql = "select * from sha256;";
+        String sql = "select * from "+hashType;
             try {
                 PreparedStatement stmt = connection.prepareStatement(sql);
                 ResultSet rs = stmt.executeQuery();
@@ -48,13 +51,13 @@ public class DatabaseTest {
 
     @Test
     public void insertHashPairTest() {
-        PassHash newPassHash = new PassHash("testHash", "testPass");
-        assert(hashDao.insertHashPair(newPassHash.getHash(), newPassHash.getPassword(), "sha256"));
+        assert(hashDao.deleteHashPair(testHash, hashType));
+        PassHash newPassHash = new PassHash(testHash, testPass);
+        assert(hashDao.insertHashPair(newPassHash.getHash(), newPassHash.getPassword(), hashType));
     }
 
     @Test
     public void findPassWithHashTest() {
-        assert(hashDao.decryptHash("testHash", "sha256").equals("testPass"));
-
+        assert(hashDao.decryptHash(testHash, hashType).equals(testPass));
     }
 }
