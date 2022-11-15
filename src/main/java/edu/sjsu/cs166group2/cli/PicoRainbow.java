@@ -1,5 +1,8 @@
 package edu.sjsu.cs166group2.cli;
 
+import edu.sjsu.cs166group2.util.DatabaseConnector;
+import edu.sjsu.cs166group2.util.HashDao;
+import edu.sjsu.cs166group2.util.HashUtil;
 import org.fusesource.jansi.AnsiConsole;
 import org.jline.console.SystemRegistry;
 import org.jline.console.impl.Builtins;
@@ -34,8 +37,10 @@ import java.util.function.Supplier;
  */
 public class PicoRainbow {
 
+    private static HashDao dbc;
     /**
      * Top-level command that just prints help.
+     * Add commands here as we develop
      */
     @Command(name = "",
             description = {
@@ -44,8 +49,9 @@ public class PicoRainbow {
                     "Hit @|magenta ALT-S|@ to toggle tailtips.",
                     ""},
             footer = {"", "Press Ctrl-D to exit."},
+            //add commands here as {command}.class
             subcommands = {
-                    MyCommand.class, PicocliCommands.ClearScreen.class, CommandLine.HelpCommand.class})
+                    insert.class, dbConnect.class, PicocliCommands.ClearScreen.class, CommandLine.HelpCommand.class})
     static class CliCommands implements Runnable {
         PrintWriter out;
 
@@ -63,15 +69,30 @@ public class PicoRainbow {
     /**
      * A command with some options to demonstrate completion.
      */
-    @Command(name = "cmd", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Command with some options to demonstrate TAB-completion.",
-                    " (Note that enum values also get completed.)"},
+    @Command(name = "connect", mixinStandardHelpOptions = true, version = "1.0",
+            description = {"Command to establish a database connection.",
+                    "Format: TBD"},
             subcommands = {Nested.class, CommandLine.HelpCommand.class})
-    static class MyCommand implements Runnable {
-        @Option(names = {"-v", "--verbose"},
-                description = { "Specify multiple -v options to increase verbosity.",
-                        "For example, `-v -v -v` or `-vvv`"})
-        private boolean[] verbosity = {};
+    static class dbConnect implements Runnable {
+
+        @ParentCommand CliCommands parent;
+
+        public void run() {
+            try{
+                dbc = new HashDao(new DatabaseConnector().initiateConnection());
+                System.out.println("Connection established.");
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+                System.out.println("failed to establish connection");
+            }
+        }
+    }
+
+    @Command(name = "insert", mixinStandardHelpOptions = true, version = "1.0",
+            description = {"Write hash/password pair.",
+                    "Format: TBD"},
+            subcommands = {Nested.class, CommandLine.HelpCommand.class})
+    static class insert implements Runnable {
 
         @ArgGroup(exclusive = false)
         private MyDuration myDuration = new MyDuration();
@@ -91,11 +112,13 @@ public class PicoRainbow {
         @ParentCommand CliCommands parent;
 
         public void run() {
-            if (verbosity.length > 0) {
-                parent.out.printf("Hi there. You asked for %d %s.%n",
-                        myDuration.amount, myDuration.unit);
-            } else {
-                parent.out.println("hi!");
+            try{
+                dbc.insertHashPair("ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+                        "a","sha256");
+                System.out.println("inserted.");
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+                System.out.println("failed to insert.");
             }
         }
     }
@@ -133,11 +156,6 @@ public class PicoRainbow {
         AnsiConsole.systemInstall();
         try {
             Supplier<Path> workDir = () -> Paths.get(System.getProperty("user.dir"));
-            // set up JLine built-in commands
-            Builtins builtins = new Builtins(workDir, null, null);
-            builtins.rename(Builtins.Command.TTOP, "top");
-            builtins.alias("zle", "widget");
-            builtins.alias("bindkey", "keymap");
             // set up picocli commands
             CliCommands commands = new CliCommands();
 
@@ -152,7 +170,7 @@ public class PicoRainbow {
             Parser parser = new DefaultParser();
             try (Terminal terminal = TerminalBuilder.builder().build()) {
                 SystemRegistry systemRegistry = new SystemRegistryImpl(parser, terminal, workDir, null);
-                systemRegistry.setCommandRegistries(builtins, picocliCommands);
+                systemRegistry.setCommandRegistries(picocliCommands);
                 systemRegistry.register("help", picocliCommands);
 
                 LineReader reader = LineReaderBuilder.builder()
@@ -161,15 +179,9 @@ public class PicoRainbow {
                         .parser(parser)
                         .variable(LineReader.LIST_MAX, 50)   // max tab completion candidates
                         .build();
-                builtins.setLineReader(reader);
                 commands.setReader(reader);
                 factory.setTerminal(terminal);
-                TailTipWidgets widgets = new TailTipWidgets(reader, systemRegistry::commandDescription, 5, TailTipWidgets.TipType.COMPLETER);
-                widgets.enable();
-                KeyMap<Binding> keyMap = reader.getKeyMaps().get("main");
-                keyMap.bind(new Reference("tailtip-toggle"), KeyMap.alt("s"));
-
-                String prompt = "prompt> ";
+                String prompt = "PicoRainbow> ";
                 String rightPrompt = null;
 
                 // start the shell and process input until the user quits with Ctrl-D
