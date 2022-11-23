@@ -1,15 +1,17 @@
 package edu.sjsu.cs166group2.cli;
+import edu.sjsu.cs166group2.model.PassHash;
 import picocli.CommandLine;
 import edu.sjsu.cs166group2.util.HashUtil;
-
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @CommandLine.Command(
         name = "PicoCLI",
         subcommands = {
                 PicoCLICreateHash.class,
                 PicoCLILookupHash.class,
-                PicoCLIPostHash.class
+                PicoCLIConnect.class
         }
 )
 public class PicoCLI implements Runnable {
@@ -54,10 +56,12 @@ class PicoCLICreateHash implements Runnable {
             HashUtil util = new HashUtil();
             // IMPLEMENT some kind of mapper which takes a string and calls the
             // appropriate hash function
-            String hashedPassword = util.hash256(exclusive.string);
+            PassHash hashObj = new PassHash(util.hash(exclusive.string, hashType), exclusive.string);
 
             // IMPLEMENT logic for uploading hashed password to the rainbow table here
-            System.out.println("Password: " + exclusive.string + " becomes " + hashedPassword + " after " + hashType + " hash");
+            // For now just print it
+            System.out.println("Password: " + hashObj.getHash() + " becomes " + hashObj.getPassword()
+                    + " after " + hashType + " hash");
 
         }
         // File has been specified. So create and upload hash for all strings
@@ -65,23 +69,35 @@ class PicoCLICreateHash implements Runnable {
         else if (exclusive.file != null) {
             System.out.println("Processing file: " + exclusive.file);
             BufferedReader br;
+            // String for storing line by line input
+            String input;
+            HashUtil util = new HashUtil();
+            List<PassHash> listOfHashes = new ArrayList<>();
+
+            // Initialize buffered reader
             try {
                 br = new BufferedReader(new FileReader(exclusive.file));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
 
-            // Declaring a string variable
-            String st;
-
+            // Read file line by line
             while (true)
             {
                 try {
-                    if ((st = br.readLine()) == null) break;
+                    if ((input = br.readLine()) == null) break;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println(st);
+                // IMPLEMENT mapping from type of hash to util function
+                listOfHashes.add(new PassHash(util.hash(input, hashType), input));
+            }
+
+            // IMPLEMENT uploading all these hashes to DB
+            // For now it just prints the list read in
+            for (PassHash obj : listOfHashes) {
+                System.out.println("Plaintext password read in: " + obj.getPassword() +
+                        "\n\t hashed as " + hashType + " " + obj.getHash());
             }
         }
         else {
@@ -118,11 +134,11 @@ class PicoCLILookupHash implements Runnable {
 
 
 @CommandLine.Command(
-        name = "postHash"
+        name = "connect"
 )
-class PicoCLIPostHash implements Runnable {
+class PicoCLIConnect implements Runnable {
     @Override
     public void run() {
-        System.out.println("Post a hash and its corresponding password to database");
+        System.out.println("Connect to DB?");
     }
 }
