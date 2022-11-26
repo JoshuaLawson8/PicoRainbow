@@ -15,12 +15,12 @@ public class DatabaseTest {
     static HashDao hashDao;
     String testHash = "0000000000000000000000000000000000000000000000000000000000000000";
     String testPass = "testPass";
-    String hashType = "sha256";
+    static String hashType = "sha256";
 
     @BeforeAll
     public static void setup(){
         connection = new DatabaseConnector().initiateConnection();
-        hashDao = new HashDao(connection);
+        hashDao = new HashDao(connection, hashType);
     }
 
     @AfterAll
@@ -51,13 +51,13 @@ public class DatabaseTest {
 
     @Test
     public void insertHashPairTest() {
-        assert(hashDao.deleteHashPair(testHash, hashType));
+        assert(hashDao.deleteHashPair(testHash));
         PassHash newPassHash = new PassHash(testHash, testPass);
-        assert(hashDao.insertHashPair(newPassHash.getHash(), newPassHash.getPassword(), hashType));
+        assert(hashDao.insertHashPair(newPassHash.getHash(), newPassHash.getPassword()));
     }
 
     @Test
     public void findPassWithHashTest() {
-        assert(hashDao.decryptHash(testHash, hashType).equals(testPass));
+        assert(hashDao.decryptHash(testHash).equals(testPass));
     }
 }
