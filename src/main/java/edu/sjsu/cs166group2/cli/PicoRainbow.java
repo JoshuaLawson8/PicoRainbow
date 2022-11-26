@@ -59,7 +59,6 @@ public class PicoRainbow {
                     dbConnect.class,
                     dbDisconnect.class,
                     dbLookUp.class,
-                    hashDelete.class,
                     PicocliCommands.ClearScreen.class,
                     CommandLine.HelpCommand.class
             })
@@ -83,7 +82,7 @@ public class PicoRainbow {
     @Command(name = "connect", mixinStandardHelpOptions = true, version = "1.0",
             description = {"Command to establish a database connection.",
                     "Format: TBD"},
-            subcommands = {Nested.class, CommandLine.HelpCommand.class})
+            subcommands = {CommandLine.HelpCommand.class})
     static class dbConnect implements Runnable {
 
         @ParentCommand CliCommands parent;
@@ -109,9 +108,9 @@ public class PicoRainbow {
      * to insert a single plaintext password or a file of plaintext passwords
      */
     @Command(name = "insert", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Write hash/password pair.",
-                    "Format: TBD"},
-            subcommands = {Nested.class, CommandLine.HelpCommand.class})
+            description = {"Write single password/file of passwords to hashes.",
+                    "Format: insert -f=<filename> or insert -s=<password>"},
+            subcommands = {CommandLine.HelpCommand.class})
     static class insert implements Runnable {
 
         @CommandLine.ArgGroup(multiplicity = "1")
@@ -158,14 +157,10 @@ public class PicoRainbow {
                     while ((input = br.readLine()) != null)
                         listOfHashes.add(new PassHash(util.hash(input, dbc.getHashType()), input));
 
+                    System.out.println("computed all hashes");
                     // Upload all these hashes to DB
                     for (PassHash obj : listOfHashes) {
-                        if (!dbc.insertHashPair(obj)) {
-                            System.out.println("Couldn't insert: " + obj.getPassword() + " because insert returned" +
-                                    "false");
-                            continue;
-                        }
-                        System.out.println("Inserted " + obj.getPassword());
+                        dbc.insertHashPair(obj);
                     }
                 }
                 else {
@@ -186,7 +181,7 @@ public class PicoRainbow {
             description = {"Find password for a given hash within the table. Connection required to a table prior to " +
                     "invoking this command",
                     "Format: TBD"},
-            subcommands = {Nested.class, CommandLine.HelpCommand.class})
+            subcommands = {CommandLine.HelpCommand.class})
     static class dbLookUp implements Runnable {
 
         @ParentCommand CliCommands parent;
@@ -221,97 +216,31 @@ public class PicoRainbow {
     }
 
     /**
-     * Command deletes a given hash if hash exists within db & table
-     */
-    @Command(name = "delete", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Deletes a hash from db if hash exists within db",
-                    "Format: TBD"},
-            subcommands = {Nested.class, CommandLine.HelpCommand.class})
-    static class hashDelete implements Runnable {
-
-        @ParentCommand CliCommands parent;
-
-        // Parameter of hash up to look up onto database
-        @CommandLine.Parameters(arity = "1", description = "Hash to delete in rainbow table")
-        String hash;
-
-        public void run() {
-            try{
-                // Ensure connection is established prior to look up
-                if (dbc == null) {
-                    System.out.println("Connection is required to database prior to delete. Please use connect command" +
-                            " to create connection first.");
-                    return;
-                }
-                dbc.deleteHashPair(hash);
-                // Delete hash. If delete fails, throw error
-                if (!dbc.deleteHashPair(hash))
-                    throw new Exception("Unable to delete hash");
-                System.out.println("Hash deleted");
-            } catch (Exception e){
-                System.out.println(e.getMessage());
-                System.out.println("Failed to find password for given hash");
-            }
-        }
-    }
-
-    /**
      * Command disconnects from database if connection exists
      */
     @Command(name = "disconnect", mixinStandardHelpOptions = true, version = "1.0",
             description = {"Disconnect from database table",
                     "Format: TBD"},
-            subcommands = {Nested.class, CommandLine.HelpCommand.class})
+            subcommands = {CommandLine.HelpCommand.class})
     static class dbDisconnect implements Runnable {
 
-        @ParentCommand CliCommands parent;
+        @ParentCommand
+        CliCommands parent;
 
         public void run() {
-            try{
+            try {
                 // Ensure connection exists
-                if (dbc == null){
+                if (dbc == null) {
                     System.out.println("No connection exists. Nothing to disconnect from");
                     return;
                 }
                 // Disconnect
                 System.out.println("Disconnected from " + dbc.getHashType() + " table");
                 dbc = null;
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
                 System.out.println("Failed to disconnect");
             }
-        }
-    }
-
-    /**
-     * Note from Saad: IDK what this command can be used for, but I left it in
-     */
-    @Command(name = "nested", mixinStandardHelpOptions = true, subcommands = {CommandLine.HelpCommand.class},
-            description = "Hosts more sub-subcommands")
-    static class Nested implements Runnable {
-        public void run() {
-            System.out.println("I'm a nested subcommand. I don't do much, but I have sub-subcommands!");
-        }
-
-        @Command(mixinStandardHelpOptions = true, subcommands = {CommandLine.HelpCommand.class},
-                description = "Multiplies two numbers.")
-        public void multiply(@Option(names = {"-l", "--left"}, required = true) int left,
-                             @Option(names = {"-r", "--right"}, required = true) int right) {
-            System.out.printf("%d * %d = %d%n", left, right, left * right);
-        }
-
-        @Command(mixinStandardHelpOptions = true, subcommands = {CommandLine.HelpCommand.class},
-                description = "Adds two numbers.")
-        public void add(@Option(names = {"-l", "--left"}, required = true) int left,
-                        @Option(names = {"-r", "--right"}, required = true) int right) {
-            System.out.printf("%d + %d = %d%n", left, right, left + right);
-        }
-
-        @Command(mixinStandardHelpOptions = true, subcommands = {CommandLine.HelpCommand.class},
-                description = "Subtracts two numbers.")
-        public void subtract(@Option(names = {"-l", "--left"}, required = true) int left,
-                             @Option(names = {"-r", "--right"}, required = true) int right) {
-            System.out.printf("%d - %d = %d%n", left, right, left - right);
         }
     }
 
