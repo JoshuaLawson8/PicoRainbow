@@ -159,9 +159,7 @@ public class PicoRainbow {
 
                     System.out.println("computed all hashes");
                     // Upload all these hashes to DB
-                    for (PassHash obj : listOfHashes) {
-                        dbc.insertHashPair(obj);
-                    }
+                    dbc.insert(listOfHashes);
                 }
                 else {
                     // Should never get here - picoCLI must require at least file or a string

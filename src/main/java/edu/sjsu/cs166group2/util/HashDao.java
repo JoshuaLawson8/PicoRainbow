@@ -4,6 +4,7 @@ import edu.sjsu.cs166group2.model.PassHash;
 
 import java.security.InvalidParameterException;
 import java.sql.*;
+import java.util.List;
 
 public class HashDao {
 
@@ -58,6 +59,31 @@ public class HashDao {
             return false;
         }
         return true;
+    }
+
+    public boolean insert(List<PassHash> listOfHashes) throws SQLException {
+        int i = 0;
+        String insertSQL = "INSERT INTO " + hashType + "(hash,password) VALUES(?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
+            for(PassHash ph : listOfHashes) {
+                try {
+
+                    preparedStatement.setString(1, ph.getHash());
+                    preparedStatement.setString(2, ph.getPassword());
+
+                    preparedStatement.addBatch();
+                    i++;
+                    if (i % 1000 == 0 || i == listOfHashes.size()) {
+
+                        preparedStatement.executeBatch(); // Execute every 1000 items.
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    continue;
+                }
+            }
+        System.out.println("Added " + i + " hashes total");
+        return false;
     }
 
     public boolean insertHashPair(PassHash passHash) {
