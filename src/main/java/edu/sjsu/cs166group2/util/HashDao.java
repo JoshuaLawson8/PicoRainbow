@@ -2,39 +2,91 @@ package edu.sjsu.cs166group2.util;
 
 import edu.sjsu.cs166group2.model.PassHash;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.security.InvalidParameterException;
+import java.sql.*;
+import java.util.List;
 
 public class HashDao {
 
     private final Connection connection;
 
-    public HashDao(Connection connection){
+    private final String hashType;
+
+    public HashDao(Connection connection, String hashType) throws InvalidParameterException {
         this.connection = connection;
+        try {
+            DatabaseMetaData dbm = connection.getMetaData();
+            // check if hashType table is there
+            ResultSet tables = dbm.getTables(null, null, hashType, null);
+            // Table doesn't exist, create it.
+            if (!tables.next()){
+                System.out.println("table for " + hashType + " didn't exist. Creating new table...");
+                int hashLength = new HashUtil().hash("test",hashType).length();
+                String createTable ="CREATE TABLE " + hashType +" (\n" +
+                        "  hash char("+ hashLength+") NOT NULL,\n" +
+                        "  password varchar(128) NOT NULL,\n" +
+                        "  PRIMARY KEY (hash)\n" +
+                        ")";
+                PreparedStatement pStatement = connection.prepareStatement(createTable);
+                pStatement.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        // Else table exists in DB and assign it
+        this.hashType = hashType;
     }
 
-    public boolean insertHashPair(String hash, String password, String hashType) {
-        if(hash == null || password == null || hash.isEmpty()|| password.isEmpty()){
+    public String getHashType() {
+        return hashType;
+    }
+
+    /**
+     * Takes in a list of hashes in our PassHash format and adds them to the currently selected table.
+     * Due to the functioning of batch statements, replaces prior hashes.
+     *
+     * @param listOfHashes
+     * @return Null
+     * @throws SQLException
+     */
+    public boolean insert(List<PassHash> listOfHashes) throws SQLException {
+        int i = 0;
+        String insertSQL = "REPLACE INTO " + hashType + "(hash,password) VALUES(?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
+            for(PassHash ph : listOfHashes) {
+                try {
+
+                    preparedStatement.setString(1, ph.getHash());
+                    preparedStatement.setString(2, ph.getPassword());
+
+                    preparedStatement.addBatch();
+                    i++;
+                    if (i % 10000 == 0 || i == listOfHashes.size()) {
+                        System.out.println("Added " + i + " hashes");
+                        preparedStatement.executeBatch(); // Execute every 1000 items.
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    continue;
+                }
+            }
+        System.out.println("Added " + i + " hashes total");
+        return false;
+    }
+
+    public boolean insertHashPair(PassHash passHash) {
+        if(passHash == null || passHash.getHash() == null || passHash.getPassword() == null ||
+                passHash.getHash().isEmpty()|| passHash.getPassword().isEmpty()){
             System.out.println("Pass/hash is null or empty");
             return false;
         }
-        else if(hash.length() != 64){
-            System.out.println("Provided Hash is not of length 64. Invalid input.");
-            return false;
-        }
-        else if(hashType == null || hashType.isEmpty()){
-            System.out.println("Hash type is not provided or invalid. Please choose between sha256....");
-            return false;
-        }
         try{
-            String insertSQL = "INSERT INTO "+hashType+"(hash,password) VALUES(?,?)";
-            PassHash newHash = new PassHash(hash, password);
+            String insertSQL = "REPLACE INTO "+hashType+"(hash,password) VALUES(?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
 
-            preparedStatement.setString(1, newHash.getHash());
-            preparedStatement.setString(2, newHash.getPassword());
+            preparedStatement.setString(1, passHash.getHash());
+            preparedStatement.setString(2, passHash.getPassword());
 
             preparedStatement.executeUpdate();
         }
@@ -45,17 +97,9 @@ public class HashDao {
         return true;
     }
 
-    public String decryptHash(String hash, String hashType){
+    public String decryptHash(String hash){
         if(hash == null || hash.isEmpty()){
             System.out.println("Hash is null or empty");
-            return null;
-        }
-        else if(hash.length() != 64){
-            System.out.println("Provided Hash is not of length 64. Invalid input.");
-            return null;
-        }
-        else if(hashType == null || hashType.isEmpty()){
-            System.out.println("Hash type is not provided or invalid. Please choose between sha256....");
             return null;
         }
         try{
@@ -73,17 +117,15 @@ public class HashDao {
         }
     }
 
-    public boolean deleteHashPair(String hash, String hashType) {
+    public boolean deleteHashPair(String hash) {
         if(hash == null || hash.isEmpty()){
             System.out.println("Hash is null or empty");
             return false;
         }
-        else if(hash.length() != 64){
-            System.out.println("Provided Hash is not of length 64. Invalid input.");
-            return false;
-        }
-        else if(hashType == null || hashType.isEmpty()){
-            System.out.println("Hash type is not provided or invalid. Please choose between sha256....");
+        else if(HashUtil.hashToLength.get(hashType) == null ||
+                hash.length() != HashUtil.hashToLength.get(hashType)){
+            System.out.println("Hash type is invalid according to HashUtil," +
+                    " not provided or has invalid length for its hash type");
             return false;
         }
         try{
