@@ -48,9 +48,12 @@ public class PicoRainbow {
      */
     @Command(name = "",
             description = {
-                    "Example interactive shell with completion and autosuggestions. " +
-                            "Hit @|magenta <TAB>|@ to see available commands.",
-                    "Hit @|magenta ALT-S|@ to toggle tailtips.",
+            "  _____ _           _____       _       _                   \n" +
+                    " |  __ (_)         |  __ \\     (_)     | |                  \n" +
+                    " | |__) |  ___ ___ | |__) |__ _ _ _ __ | |__   _____      __\n" +
+                    " |  ___/ |/ __/ _ \\|  _  // _` | | '_ \\| '_ \\ / _ \\ \\ /\\ / /\n" +
+                    " | |   | | (_| (_) | | \\ \\ (_| | | | | | |_) | (_) \\ V  V / \n" +
+                    " |_|   |_|\\___\\___/|_|  \\_\\__,_|_|_| |_|_.__/ \\___/ \\_/\\_/ ",
                     ""},
             footer = {"", "Press Ctrl-D to exit."},
             //add commands here as {command}.class
@@ -76,12 +79,8 @@ public class PicoRainbow {
         }
     }
 
-    /**
-     * A command with some options to demonstrate completion.
-     */
     @Command(name = "connect", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Command to establish a database connection.",
-                    "Format: TBD"},
+            description = {"Establish a database connection. Only specify -w to connect to localhost."},
             subcommands = {CommandLine.HelpCommand.class})
     static class dbConnect implements Runnable {
 
@@ -196,9 +195,7 @@ public class PicoRainbow {
      * Command tries to look up corresponding plaintext password for a given hash
      */
     @Command(name = "find", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Find password for a given hash within the table. Connection required to a table prior to " +
-                    "invoking this command",
-                    "Format: TBD"},
+            description = {"Find password based on given hash"},
             subcommands = {CommandLine.HelpCommand.class})
     static class dbLookUp implements Runnable {
 
@@ -237,7 +234,7 @@ public class PicoRainbow {
      * Command disconnects from database if connection exists
      */
     @Command(name = "disconnect", mixinStandardHelpOptions = true, version = "1.0",
-            description = {"Disconnect from database table",
+            description = {"Disconnect from database table.",
                     "Format: TBD"},
             subcommands = {CommandLine.HelpCommand.class})
     static class dbDisconnect implements Runnable {

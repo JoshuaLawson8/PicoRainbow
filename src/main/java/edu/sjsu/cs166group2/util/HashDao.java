@@ -18,7 +18,7 @@ public class HashDao {
             DatabaseMetaData dbm = connection.getMetaData();
             // check if hashType table is there
             ResultSet tables = dbm.getTables(null, null, hashType, null);
-            // Table table doesnt exists
+            // Table doesn't exist, create it.
             if (!tables.next()){
                 System.out.println("table for " + hashType + " didn't exist. Creating new table...");
                 int hashLength = new HashUtil().hash("test",hashType).length();
@@ -42,28 +42,14 @@ public class HashDao {
         return hashType;
     }
 
-    public boolean insertHashPair(String hash, String password) {
-        if(hash == null || password == null || hash.isEmpty()|| password.isEmpty()){
-            System.out.println("Pass/hash is null or empty");
-            return false;
-        }
-        try{
-            String insertSQL = "INSERT INTO "+hashType+"(hash,password) VALUES(?,?)";
-            PassHash newHash = new PassHash(hash, password);
-            PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
-
-            preparedStatement.setString(1, newHash.getHash());
-            preparedStatement.setString(2, newHash.getPassword());
-
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            System.out.println("Insert failed because: "+e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     * Takes in a list of hashes in our PassHash format and adds them to the currently selected table.
+     * Due to the functioning of batch statements, replaces prior hashes.
+     *
+     * @param listOfHashes
+     * @return Null
+     * @throws SQLException
+     */
     public boolean insert(List<PassHash> listOfHashes) throws SQLException {
         int i = 0;
         String insertSQL = "REPLACE INTO " + hashType + "(hash,password) VALUES(?,?)";

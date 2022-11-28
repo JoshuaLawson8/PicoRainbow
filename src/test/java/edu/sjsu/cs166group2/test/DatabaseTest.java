@@ -53,7 +53,7 @@ public class DatabaseTest {
     public void insertHashPairTest() {
         assert(hashDao.deleteHashPair(testHash));
         PassHash newPassHash = new PassHash(testHash, testPass);
-        assert(hashDao.insertHashPair(newPassHash.getHash(), newPassHash.getPassword()));
+        assert(hashDao.insertHashPair(newPassHash));
     }
 
     @Test

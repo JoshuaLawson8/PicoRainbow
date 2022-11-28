@@ -23,7 +23,7 @@ public class DatabaseConnector {
     public Connection initiateConnection(){
         Properties props = new Properties();
         props.setProperty("rewriteBatchedStatements", "true");
-        String local = "jdbc:mysql://root:password@localhost:3306/rainbowtable?ssl-mode=REQUIRED?rewriteBatchedStatements=true";
+        String local = "jdbc:mysql://root:password@localhost:3306/rainbowtable";
         try {
             return DriverManager.getConnection(local,props);
         } catch (Exception e) {
