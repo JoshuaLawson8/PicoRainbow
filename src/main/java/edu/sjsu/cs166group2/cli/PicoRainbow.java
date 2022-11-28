@@ -87,17 +87,37 @@ public class PicoRainbow {
 
         @ParentCommand CliCommands parent;
 
-        @CommandLine.Option(names = {"-h", "--hash"}, defaultValue = "sha256",
+        @Option(names = {"-h", "--host"}, defaultValue = "localhost",
+                description = "host of db to connect to")
+        private String host;
+
+        @Option(names = {"-p", "--port"}, defaultValue = "3306",
+                description = "host port")
+        private int port;
+
+        @Option(names = {"-u", "--username"}, defaultValue = "root",
+                description = "username of user connecting to db")
+        private String username;
+
+        @Option(names = {"-w", "--password"}, description = "Passphrase", interactive = true, required = true)
+        private char[] password;
+        @CommandLine.Option(names = {"-t", "--hash"}, defaultValue = "sha256",
                 description = "Specify which rainbow table hash type to connect to. Defaults to sha256")
-        String hashType;
+        private String hashType;
 
         public void run() {
-            try {
-                dbc = new HashDao(new DatabaseConnector().initiateConnection(), hashType.toLowerCase());
-                System.out.println("Connection established to table: " + hashType);
-            } catch (Exception e){
-                System.out.println(e.getMessage());
-                System.out.println("failed to establish connection");
+            HashUtil hashUtil = new HashUtil();
+            if(hashUtil.validHash(hashType)) {
+                try {
+                    dbc = new HashDao(new DatabaseConnector().initiateConnection(host, port, username, String.valueOf(password)), hashType.toLowerCase());
+                    System.out.println("Connection established to table: " + hashType);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    System.out.println("failed to establish connection");
+                }
+            }
+            else{
+                System.out.println("Could not establish connection: Invalid hash type");
             }
         }
     }

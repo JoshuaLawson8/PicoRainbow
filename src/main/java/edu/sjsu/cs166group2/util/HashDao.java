@@ -19,8 +19,17 @@ public class HashDao {
             // check if hashType table is there
             ResultSet tables = dbm.getTables(null, null, hashType, null);
             // Table table doesnt exists
-            if (!tables.next())
-                throw new InvalidParameterException("Table '" + hashType + "' doesn't exist");
+            if (!tables.next()){
+                System.out.println("table for " + hashType + " didn't exist. Creating new table...");
+                int hashLength = new HashUtil().hash("test",hashType).length();
+                String createTable ="CREATE TABLE " + hashType +" (\n" +
+                        "  hash char("+ hashLength+") NOT NULL,\n" +
+                        "  password varchar(128) NOT NULL,\n" +
+                        "  PRIMARY KEY (hash)\n" +
+                        ")";
+                PreparedStatement pStatement = connection.prepareStatement(createTable);
+                pStatement.executeUpdate();
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -36,12 +45,6 @@ public class HashDao {
     public boolean insertHashPair(String hash, String password) {
         if(hash == null || password == null || hash.isEmpty()|| password.isEmpty()){
             System.out.println("Pass/hash is null or empty");
-            return false;
-        }
-        else if(HashUtil.hashToLength.get(hashType) == null ||
-                hash.length() != HashUtil.hashToLength.get(hashType)){
-            System.out.println("Hash type is invalid according to HashUtil," +
-                    " not provided or has invalid length for its hash type");
             return false;
         }
         try{
@@ -63,7 +66,7 @@ public class HashDao {
 
     public boolean insert(List<PassHash> listOfHashes) throws SQLException {
         int i = 0;
-        String insertSQL = "INSERT INTO " + hashType + "(hash,password) VALUES(?,?)";
+        String insertSQL = "REPLACE INTO " + hashType + "(hash,password) VALUES(?,?)";
         PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
             for(PassHash ph : listOfHashes) {
                 try {
@@ -73,8 +76,8 @@ public class HashDao {
 
                     preparedStatement.addBatch();
                     i++;
-                    if (i % 1000 == 0 || i == listOfHashes.size()) {
-
+                    if (i % 10000 == 0 || i == listOfHashes.size()) {
+                        System.out.println("Added " + i + " hashes");
                         preparedStatement.executeBatch(); // Execute every 1000 items.
                     }
                 } catch (Exception e) {
@@ -92,14 +95,8 @@ public class HashDao {
             System.out.println("Pass/hash is null or empty");
             return false;
         }
-        else if(HashUtil.hashToLength.get(hashType) == null ||
-                passHash.getHash().length() != HashUtil.hashToLength.get(hashType)){
-            System.out.println("Hash type is invalid according to HashUtil," +
-                    " not provided or has invalid length for its hash type");
-            return false;
-        }
         try{
-            String insertSQL = "INSERT INTO "+hashType+"(hash,password) VALUES(?,?)";
+            String insertSQL = "REPLACE INTO "+hashType+"(hash,password) VALUES(?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
 
             preparedStatement.setString(1, passHash.getHash());
@@ -117,12 +114,6 @@ public class HashDao {
     public String decryptHash(String hash){
         if(hash == null || hash.isEmpty()){
             System.out.println("Hash is null or empty");
-            return null;
-        }
-        else if(HashUtil.hashToLength.get(hashType) == null ||
-                hash.length() != HashUtil.hashToLength.get(hashType)){
-            System.out.println("Hash type is invalid according to HashUtil," +
-                    " not provided or has invalid length for its hash type");
             return null;
         }
         try{
