@@ -1,5 +1,7 @@
 # PicoRainbow
 
+Application that uses a database to quickly crack password hashes, or generate new entries to a rainbow table for later use.
+
 How to use:
 
 1. Download PicoRainbow.jar 
